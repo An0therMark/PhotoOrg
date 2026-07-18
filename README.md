@@ -1,2 +1,3 @@
 # PhotoOrg
-Script I am making for moving and organizing my photos
+
+Script I am writing for moving and organizing my photos
