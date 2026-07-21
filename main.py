@@ -28,21 +28,20 @@ def photo_exif(file_path):
     # Get the tag for date and time.
     exif_date = exif_dict.get('DateTime')
 
-    # cleaning date exctracted from exif into format that I use in my folder structure
+    # cleaning date exctracted from exif. 
     clean_time = datetime.strptime(exif_date, '%Y:%m:%d %H:%M:%S')
 
-    # Extracts camera model from exif, and runs it trough earlier function to clean it up.
+    # Extracts camera model from exif, and cleans it up
     exif_model = exif_dict.get('Model')
+
     #Just in case will put this here
     if not exif_model:
         clean_model = "Unknown Camera"
     else:
+
         #Removes "EOS" from camera model
         clean_model = exif_model
         clean_model = clean_model.removeprefix("Canon EOS ")
-
-    # Need to make underscore for naming
-    clean_model = clean_model.replace(" ", "_")
         
     return clean_time, clean_model
 
