@@ -7,6 +7,7 @@ from PIL import Image
 from PIL.ExifTags import TAGS
 from datetime import datetime
 import os 
+import shutil
 
 # Function for exif data
 def photo_exif(file_path):
@@ -91,7 +92,8 @@ if flash_path is None:
 print(f"found {flash_path}")
 
 # Variable for all files 
-all_files = list(flash_path.iterdir())
+#all_files = list(flash_path.iterdir())
+all_files = [f for f in flash_path.iterdir() if f.is_file()]
 
 # Error if folder is empty 
 if not all_files:
@@ -113,7 +115,7 @@ folder_name = f"{date_str}_{path_model}"
 # Now it will take this name, and create a folder where I want it!
 target_root = Path("D:/Photo")
 target_out_root = Path("D:/photo_out")
-target_folder = target_root / folder_name
+target_folder = target_root / folder_name #actual path to the output folders
 target_out_folder = target_out_root / folder_name
 
 # Create the folders
@@ -122,3 +124,23 @@ target_out_folder.mkdir(exist_ok=True)
 
 print("--- EXIF READ SUCCESSFUL ---")
 print(f"Created folders: {target_folder} and {target_out_folder}")
+
+
+#Copying files
+copied_files = []
+
+
+for file in all_files:
+    dest_file = target_folder / file.name
+    try:
+        shutil.copy2(file, dest_file)
+        copied_files.append((file, dest_file))
+        print(f"  Copied: {file.name}")
+    except Exception as e:
+        print(f"\nCan't copy {file.name}: {e}")
+        input("Press Enter")
+        exit()
+
+print("--- COPYING WAS SUCCESSFUL ---")
+print("Press enter")
+exit()
