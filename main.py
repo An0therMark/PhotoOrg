@@ -1,5 +1,6 @@
 
 #libraries for working with windows drives
+import time
 import win32api
 import win32file
 from pathlib import Path
@@ -8,6 +9,13 @@ from PIL.ExifTags import TAGS
 from datetime import datetime
 import os 
 import shutil
+import hashlib
+
+
+CGREEN  = '\33[32m'
+CRED = '\033[91m'
+CEND = '\033[0m'
+
 
 # Function for exif data
 def photo_exif(file_path):
@@ -58,6 +66,14 @@ def get_file_number(file_path):
         except ValueError:
             pass
     return 0
+
+# Calculating hash sum
+def md5(file_path):
+    hash_md5 = hashlib.md5()
+    with open(file_path, "rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
 
 #This line getting all the drive letters, remove "\x00" from raw windows responce, and removes last result (actual raw windows response looks like "C:\x00D:\x00E:\x00\x00")
 drives = win32api.GetLogicalDriveStrings().split('\x00')[:-1]
@@ -124,23 +140,67 @@ target_out_folder.mkdir(exist_ok=True)
 
 print("--- EXIF READ SUCCESSFUL ---")
 print(f"Created folders: {target_folder} and {target_out_folder}")
+time.sleep(3)
 
 
 #Copying files
 copied_files = []
-
 
 for file in all_files:
     dest_file = target_folder / file.name
     try:
         shutil.copy2(file, dest_file)
         copied_files.append((file, dest_file))
-        print(f"  Copied: {file.name}")
+       #print(f"  Copied: {file.name}")
     except Exception as e:
         print(f"\nCan't copy {file.name}: {e}")
         input("Press Enter")
         exit()
 
-print("--- COPYING WAS SUCCESSFUL ---")
+print(CGREEN + "--- COPYING WAS SUCCESSFUL ---" + CEND)
 print("Press enter")
-exit()
+
+# Verification
+verification_failed = False #Need a variable to track if there an error
+
+for file, dest_file in copied_files:
+        source_hash = md5(file)
+        dest_hash = md5(dest_file)
+
+        if source_hash == dest_hash:
+            print(f"{file.name}Hash OK")
+        else:
+            print("ERROR DETECTED")
+            verification_failed = True
+            break 
+
+if verification_failed:
+    print(CRED + "\n--- HASH MISMATCH! ---" + CEND)
+    print(f"File {file.name} was corrupted during copy.")
+    print("Please check your USB connection and file avalibility")
+    input("Press Enter to exit...")
+    exit()
+
+print(CGREEN + "--- All files verified successfully! ---" + CEND)
+
+
+Deletion = True
+
+for file, dest_file in copied_files:
+    try:
+        file.unlink()
+    except Exception as e:
+        print(CRED + f"ERROR deleting {file.name}: {e}" + CEND)
+        Deletion = False
+        break
+
+if not Deletion:
+    print(CRED + "--- ERROR DURING DELETION ---" + CEND)
+    print("Somethign went wrong")
+    print("Press Enter")
+    input()
+
+print(CGREEN + "\n--- ALL DONE ---" + CEND)
+print(f"Your photos are safely stored in: {target_folderfolder}")
+input("Press Enter to exit...")
+input()
