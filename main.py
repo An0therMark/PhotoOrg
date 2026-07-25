@@ -10,6 +10,7 @@ from datetime import datetime
 import os 
 import shutil
 import hashlib
+import sys
 
 
 CGREEN  = '\33[32m'
@@ -101,9 +102,9 @@ for drive in drives:
 
 # Error in case something goes wrong
 if flash_path is None:
-    print("Can't find SD card with photos")
+    print(CRED + "Can't find SD card with photos" + CEND)
     input("press enter to exit")
-    exit()
+    sys.exit()
 
 print(f"found {flash_path}")
 
@@ -115,7 +116,7 @@ all_files = [f for f in flash_path.iterdir() if f.is_file()]
 if not all_files:
     print("SD is found, but there is no photos. Check your SD.")
     input("Press Enter")
-    exit()
+    sys.exit()
 
 # This will call the function for getting the number, and will sort it, storing the last one
 sorted_files = sorted(all_files, key=get_file_number)
@@ -158,7 +159,6 @@ for file in all_files:
         exit()
 
 print(CGREEN + "--- COPYING WAS SUCCESSFUL ---" + CEND)
-print("Press enter")
 
 # Verification
 verification_failed = False #Need a variable to track if there an error
@@ -179,7 +179,7 @@ if verification_failed:
     print(f"File {file.name} was corrupted during copy.")
     print("Please check your USB connection and file avalibility")
     input("Press Enter to exit...")
-    exit()
+    sys.exit()
 
 print(CGREEN + "--- All files verified successfully! ---" + CEND)
 
@@ -197,8 +197,8 @@ for file, dest_file in copied_files:
 if not Deletion:
     print(CRED + "--- ERROR DURING DELETION ---" + CEND)
     print("Somethign went wrong")
-    print("Press Enter")
-    input()
+    input("Press Enter")
+    sys.exit()
 
 print(CGREEN + "\n--- ALL DONE ---" + CEND)
 print(f"Your photos are safely stored in: {target_folderfolder}")
